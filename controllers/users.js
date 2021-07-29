@@ -1,14 +1,74 @@
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const messages = require('../utils/messages');
+const NotFoundError = require('../errors/notfound');
+const BadRequestError = require('../errors/badrequest');
+const ConflictError = require('../errors/conflict');
+
+const SALT_LENGHT = 10;
+const MONGO_DUPLICATE_ERROR_CODE = 11000;
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getUsers = (req, res, next) => {
   User.find({}).then((users) => res.send(users).catch(next));
 };
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.send(user))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, password, email,
+  } = req.body;
+  if (!email || !password) {
+    throw new BadRequestError(messages.user.allFilled);
+  }
+
+  bcrypt.hash(req.body.password, SALT_LENGHT).then((hash) => User.create({
+    name, about, avatar, password: hash, email,
+  }))
+    .then((user) => res.send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      password: user.password,
+      email: user.email,
+    }))
+
+    .catch((err) => {
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE && err.name === 'MongoError') {
+        next(new ConflictError(messages.user.sameData));
+      } else if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequestError(messages.user.isValid));
+      } else {
+        next(err);
+      }
+    });
 };
 
-module.exports = { getUsers, createUser };
+const getUserById = (req, res, next) => {
+  User.findOne({ _id: req.params.userId })
+
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new NotFoundError(messages.user.id.userNotFound));
+      }
+    });
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        { expiresIn: '7d' });
+
+      res.send({ token });
+    })
+    .catch(next);
+};
+
+module.exports = {
+  getUsers, createUser, getUserById, login,
+};
