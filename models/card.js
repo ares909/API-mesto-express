@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
+const messages = require('../utils/messages');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -10,6 +12,10 @@ const userSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (str) => validator.isURL(str),
+      message: messages.card.isLinkValid,
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -24,6 +30,11 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
+  },
+  __v: {
+    type: String,
+    select: false,
+
   },
 });
 

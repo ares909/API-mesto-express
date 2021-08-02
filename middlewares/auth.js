@@ -5,18 +5,19 @@ const BadRequestError = require('../errors/badrequest');
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
-  const { authorization } = req.headers;
-  if (!authorization || !authorization.startsWith('Bearer ')) {
-    throw new BadRequestError(messages.login.notLogged);
+  const token = req.cookies.jwt;
+
+  if (!token) {
+    return next(new BadRequestError(messages.login.notLogged));
+    // return next(token);
   }
-  const token = authorization.replace('Bearer ', '');
 
   let payload;
 
   try {
     payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
   } catch (err) {
-    return next(new BadRequestError(messages.login.notLogged));
+    return next(BadRequestError(messages.login.notLogged));
   }
 
   req.user = payload;

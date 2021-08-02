@@ -1,17 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
+const { mongoUrl, mongoParams } = require('./utils/mongo-params');
+
 const { PORT = 3000 } = process.env;
 
 const app = express();
 
 const router = require('./routes');
 
-mongoose.connect('mongodb://localhost:27017/mesto-app-db', {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-});
+mongoose.connect(mongoUrl, mongoParams);
 
 app.use(express.json());
 

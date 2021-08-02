@@ -2,14 +2,14 @@ const messages = {
   error: {
     onError: 'На сервере произошла ошибка',
   },
-  movie: {
+  card: {
     isValid: 'Введите корректные данные',
     isLinkValid: 'Некорректная ссылка',
     id: {
-      movieNotFound: 'Нет файла с таким id',
+      cardNotFound: 'Нет файла с таким id',
       userNotFound: 'Id пользователя не совпадает с владельцем файла',
     },
-    onDelete: 'Карточка фильма удалена',
+    onDelete: 'Карточка удалена',
   },
 
   user: {
