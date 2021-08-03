@@ -1,8 +1,8 @@
 const Card = require('../models/card');
 const messages = require('../utils/messages');
-const NotFoundError = require('../errors/notfound');
+
 const BadRequestError = require('../errors/badrequest');
-const ConflictError = require('../errors/conflict');
+
 const ForbiddenError = require('../errors/forbidden');
 
 const getCards = (req, res, next) => {

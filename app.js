@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
+// require('dotenv').config();
 
 const { mongoUrl, mongoParams } = require('./utils/mongo-params');
 
-const { PORT = 3000 } = process.env;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 
