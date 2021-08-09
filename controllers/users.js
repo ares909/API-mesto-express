@@ -95,7 +95,13 @@ const getUserById = (req, res, next) => {
 const getUser = (req, res, next) => {
   User.findOne({ _id: req.user })
     .orFail(() => new NotFoundError(messages.user.id.userNotFound))
-    .then((user) => res.send({ name: user.name, email: user.email }))
+    .then((user) => res.send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch(next);
 };
 
